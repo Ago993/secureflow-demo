@@ -1,0 +1,20 @@
+"use strict";
+const fs=require("fs"), path=require("path"), assert=require("assert");
+const root=path.join(__dirname,"..");
+const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
+const js=fs.readFileSync(path.join(root,"app.js"),"utf8");
+const css=fs.readFileSync(path.join(root,"styles.css"),"utf8");
+
+assert.ok(html.includes("Content-Security-Policy"),"CSP missing");
+assert.ok(html.includes("connect-src 'none'"),"network must be disabled");
+assert.ok(html.includes("NO LIVE SCANNING"),"scope badge missing");
+assert.ok(html.includes('id="findingsBody"'),"findings table missing");
+assert.ok(html.includes('id="jsonInput"'),"local import missing");
+assert.ok(!js.includes(".innerHTML"),"innerHTML is not allowed");
+assert.ok(!js.includes("fetch("),"fetch/network calls are not allowed");
+assert.ok(!js.includes("XMLHttpRequest"),"XHR is not allowed");
+assert.ok(js.includes("1024*1024"),"file size guard missing");
+assert.ok(js.includes("findings.length > 500"),"row cap missing");
+assert.ok(js.includes("networkScanning:false"),"report scope marker missing");
+assert.ok(css.includes("@media(max-width:600px)"),"mobile CSS missing");
+console.log("SecureFlow static/security checks passed");
